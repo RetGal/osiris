@@ -2,7 +2,9 @@
 
 workingDir=/home/bot/maverage
 scriptName=maverage.py
+# -ac for holdntrade
 params=
+# only for maverage
 exclude=mamaster
 minFree=40960
 
