@@ -6,9 +6,9 @@ params=
 exclude=mamaster
 minFree=40960
 
-if [[ ${minFree} -gt 0 ]]; then
+if [ ${minFree} -gt 0 ]; then
     free=`free | awk 'NR == 2{print $3}'`
-    if [[ ${free} -lt ${minFree} ]]; then
+    if [ ${free} -lt ${minFree} ]; then
        echo terminating all ${scriptName} instances
        killall ${scriptName} 2>/dev/null
        sleep 2
@@ -19,12 +19,12 @@ cd ${workingDir}
 find -name "*.pid" -type f 2>/dev/null | while read file;
 do
   read pid instance < ${file}
-  if [[ ${instance} != ${exclude} ]]; then
+  if [ ${instance} != ${exclude} ]; then
       kill -0 ${pid} 2>/dev/null
-      if [[ $? -eq 1 ]]; then
+      if [ $? -eq 1 ]; then
         echo resurrecting ${instance}
         tmux has-session -t ${instance} 2>/dev/null
-        if [[ $? -eq 1 ]]; then
+        if [ $? -eq 1 ]; then
           tmux new -d -s ${instance}
         fi
         sleep 2
