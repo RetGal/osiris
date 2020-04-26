@@ -21,7 +21,7 @@ cd ${workingDir}
 find -name "*.pid" -type f 2>/dev/null | while read file;
 do
   read pid instance < ${file}
-  if [ ${instance} != ${exclude} ]; then
+  if [ ${instance} != "${exclude}" ]; then
       kill -0 ${pid} 2>/dev/null
       if [ $? -eq 1 ]; then
         echo resurrecting ${instance}
