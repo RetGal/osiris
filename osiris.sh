@@ -9,8 +9,8 @@ exclude=mamaster
 minFree=40960
 
 if [ ${minFree} -gt 0 ]; then
-    free=`free | awk 'NR == 2{print $4}'`
-    if [ ${free} -lt ${minFree} ]; then
+    available=`free | awk 'NR == 2{print $7}'`
+    if [ ${available} -lt ${minFree} ]; then
        echo terminating all ${scriptName} instances
        killall ${scriptName} 2>/dev/null
        sleep 2
