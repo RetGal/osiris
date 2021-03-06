@@ -9,30 +9,30 @@ exclude=mamaster
 minFree=40960
 
 if [ ${minFree} -gt 0 ]; then
-    available=`free | awk 'NR == 2{print $7}'`
-    if [ ${available} -lt ${minFree} ]; then
-       echo terminating all ${scriptName} instances
+    available=$(free | awk 'NR == 2{print $7}')
+    if [ "${available}" -lt ${minFree} ]; then
+       echo "terminating all ${scriptName} instances"
        killall ${scriptName} 2>/dev/null
        sleep 2
     fi
 fi
 
-cd ${workingDir}
-find -name "*.pid" -type f 2>/dev/null | while read file;
+cd "${workingDir}" || exit 1
+
+find . -name "*.pid" -type f 2>/dev/null | while read -r file;
 do
-  read pid instance < ${file}
-  if [ ${instance} != "${exclude}" ]; then
-      kill -0 ${pid} 2>/dev/null
-      if [ $? -eq 1 ]; then
-        echo resurrecting ${instance}
-        tmux has-session -t ${instance} 2>/dev/null
+  read -r pid instance < "${file}"
+  if [ "${instance}" != ${exclude} ]; then
+      if kill -0 "${pid}" 2>/dev/null; then
+        echo "${instance} is alive"
+      else
+        echo "resurrecting ${instance}"
+        tmux has-session -t "${instance}" 2>/dev/null
         if [ $? -eq 1 ]; then
-          tmux new -d -s ${instance}
+          tmux new -d -s "${instance}"
         fi
         sleep 2
-        tmux send-keys -t "$instance" C-z "$workingDir/$scriptName $instance $params" C-m
-      else
-        echo ${instance} is alive
+        tmux send-keys -t "${instance}" C-z "${workingDir}/${scriptName} ${instance} ${params}" C-m
       fi
   fi
 done
