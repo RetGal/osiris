@@ -23,9 +23,16 @@ find . -name "*.pid" -type f 2>/dev/null | while read -r file;
 do
   read -r pid instance < "${file}"
   if [ "${instance}" != ${exclude} ]; then
+      resurrect=0
       if kill -0 "${pid}" 2>/dev/null; then
-        echo "${instance} is alive"
-      else
+        processName=$(ps --pid "${pid}" -o comm h)
+        if [ ${scriptName} != "${processName}" ]; then
+          resurrect=1
+        else
+          echo "${instance} is alive"
+        fi
+      fi
+      if [ ${resurrect} -eq 1 ]; then
         echo "resurrecting ${instance}"
         tmux has-session -t "${instance}" 2>/dev/null
         if [ $? -eq 1 ]; then
