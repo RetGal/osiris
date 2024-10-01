@@ -26,11 +26,13 @@ do
       resurrect=0
       if kill -0 "${pid}" 2>/dev/null; then
         processName=$(ps --pid "${pid}" -o comm h)
-        if [ ${scriptName} != "${processName}" ]; then
+        if [ "${scriptName}" != "${processName}" ]; then
           resurrect=1
         else
           echo "${instance} is alive"
         fi
+      else
+        resurrect=1
       fi
       if [ ${resurrect} -eq 1 ]; then
         echo "resurrecting ${instance}"
