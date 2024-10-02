@@ -11,11 +11,10 @@ minFree=40960
 resurrect() {
   instance=$1
   echo "resurrecting ${instance}"
-  tmux has-session -t "${instance}" 2>/dev/null
-  if [ $? -eq 1 ]; then
+  if ! tmux has-session -t "${instance}" 2>/dev/null; then
     tmux new -d -s "${instance}"
+    sleep 1
   fi
-  sleep 2
   tmux send-keys -t "${instance}" C-z "${workingDir}/${scriptName} ${instance} ${params}" C-m
 }
 
@@ -24,7 +23,6 @@ if [ ${minFree} -gt 0 ]; then
   if [ "${available}" -lt ${minFree} ]; then
     echo "terminating all ${scriptName} instances"
     killall ${scriptName} 2>/dev/null
-    sleep 2
   fi
 fi
 
