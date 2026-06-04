@@ -2,11 +2,15 @@
 
 workingDir=/home/bot/maverage
 scriptName=maverage.py
+# virtual environment directory
+venvDir=
 # -ac for holdntrade
 params=
 # only for maverage
 exclude=mamaster
 minFree=40960
+
+set -e
 
 resurrect() {
   instance=$1
@@ -15,7 +19,7 @@ resurrect() {
     tmux new -d -s "${instance}"
     sleep 1
   fi
-  tmux send-keys -t "${instance}" C-z "${workingDir}/${scriptName} ${instance} ${params}" C-m
+  tmux send-keys -t "${instance}" C-z "python3 ${workingDir}/${scriptName} ${instance} ${params}" C-m
 }
 
 if [ ${minFree} -gt 0 ]; then
@@ -27,6 +31,9 @@ if [ ${minFree} -gt 0 ]; then
 fi
 
 cd "${workingDir}" || exit 1
+if [ -n "${venvDir}" ]; then
+  . "${venvDir}/bin/activate"
+fi
 
 find . -name "*.pid" -type f 2>/dev/null | while read -r file;
 do
