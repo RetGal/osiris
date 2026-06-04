@@ -22,30 +22,34 @@ resurrect() {
   tmux send-keys -t "${instance}" C-z "python ${workingDir}/${scriptName} ${instance} ${params}" C-m
 }
 
-if [ ${minFree} -gt 0 ]; then
-  available=$(free | awk 'NR == 2{print $7}')
-  if [ "${available}" -lt ${minFree} ]; then
-    echo "terminating all ${scriptName} instances"
-    killall python 2>/dev/null
+check_memory() {
+  if [ ${minFree} -gt 0 ]; then
+    available=$(free | awk 'NR == 2{print $7}')
+    if [ "${available}" -lt ${minFree} ]; then
+      echo "terminating all python processes"
+      killall python 2>/dev/null
+    fi
   fi
-fi
+}
 
-cd "${workingDir}" || exit 1
-if [ -n "${venvDir}" ]; then
-  . "${venvDir}/bin/activate"
-fi
+activate_venv() {
+  [ -n "${venvDir}" ] && . "${venvDir}/bin/activate"
+}
 
-find . -name "*.pid" -type f 2>/dev/null | while read -r file;
-do
-  read -r pid instance < "${file}"
-  if [ "${instance}" != ${exclude} ]; then
-    if kill -0 "${pid}" 2>/dev/null; then
-      processName=$(ps --pid "${pid}" -o comm h)
-      if [ "python" = "${processName}" ]; then
+process_instances() {
+  find . -name "*.pid" -type f 2>/dev/null | while read -r file; do
+    read -r pid instance < "${file}"
+    if [ "${instance}" != "${exclude}" ]; then
+      if ! (kill -0 "${pid}" 2>/dev/null && ps --pid "${pid}" -o comm= | grep -q "python"); then
+        resurrect "${instance}"
+      else
         echo "${instance} is alive"
-        continue
       fi
     fi
-    resurrect "${instance}"
-  fi
-done
+  done
+}
+
+check_memory
+cd "${workingDir}" || exit 1
+activate_venv
+process_instances
