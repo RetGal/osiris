@@ -19,14 +19,14 @@ resurrect() {
     tmux new -d -s "${instance}"
     sleep 1
   fi
-  tmux send-keys -t "${instance}" C-z "python3 ${workingDir}/${scriptName} ${instance} ${params}" C-m
+  tmux send-keys -t "${instance}" C-z "python ${workingDir}/${scriptName} ${instance} ${params}" C-m
 }
 
 if [ ${minFree} -gt 0 ]; then
   available=$(free | awk 'NR == 2{print $7}')
   if [ "${available}" -lt ${minFree} ]; then
     echo "terminating all ${scriptName} instances"
-    killall ${scriptName} 2>/dev/null
+    killall python 2>/dev/null
   fi
 fi
 
@@ -41,7 +41,7 @@ do
   if [ "${instance}" != ${exclude} ]; then
     if kill -0 "${pid}" 2>/dev/null; then
       processName=$(ps --pid "${pid}" -o comm h)
-      if [ "${scriptName}" = "${processName}" ]; then
+      if [ "python" = "${processName}" ]; then
         echo "${instance} is alive"
         continue
       fi
